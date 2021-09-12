@@ -11,57 +11,57 @@ import (
 
 // Constants
 const (
-	Debug = false
-	NumStrings = 6
-	NumFrets = 25
+	Debug             = false
+	NumStrings        = 6
+	NumFrets          = 25
 	NumCanonicalNotes = 12
-	MinOctave = 2
-	MaxOctave = 6
-	ScaleOctave = 3
-	ScaleCutoff = 10
-	PngSquareLength = 200
-	FontRegular     = "/usr/share/fonts/TTF/IBMPlexMono-Regular.ttf"
-	FontSizeRegular = 96
-	FontLight = "/usr/share/fonts/TTF/IBMPlexMono-Light.ttf"
-	FontSizeLight = 70
-	FontSizeTitle = 50
+	MinOctave         = 2
+	MaxOctave         = 6
+	ScaleOctave       = 3
+	ScaleCutoff       = 10
+	PngSquareLength   = 200
+	FontRegular       = "/usr/share/fonts/TTF/IBMPlexMono-Regular.ttf"
+	FontSizeRegular   = 96
+	FontLight         = "/usr/share/fonts/TTF/IBMPlexMono-Light.ttf"
+	FontSizeLight     = 70
+	FontSizeTitle     = 50
 )
 
 func getOpenStringNotes() [6]string {
-	return [6]string {"E", "B", "G", "D", "A", "E"}
+	return [6]string{"E", "B", "G", "D", "A", "E"}
 }
 
 func getOpenStringOctaves() [6]int {
-	return [6]int {4, 3, 3, 3, 2, 2}
+	return [6]int{4, 3, 3, 3, 2, 2}
 }
 
 func getCanonicalNotes() [12]string {
-	return [12]string {
+	return [12]string{
 		"C", "C#", "D", "D#",
 		"E", "F", "F#", "G",
 		"G#", "A", "A#", "B"}
 }
 
 func getMinorScaleSteps() [8]int {
-	return [8]int {2, 1, 2, 2, 1, 2, 2, 0}
+	return [8]int{2, 1, 2, 2, 1, 2, 2, 0}
 }
 
 func getMajorScaleSteps() [8]int {
-	return [8]int {2, 2, 1, 2, 2, 2, 1, 0}
+	return [8]int{2, 2, 1, 2, 2, 2, 1, 0}
 }
 
 type MusicalNote struct {
-	note string
+	note   string
 	octave int
 }
 
 type FretboardCoordinate struct {
 	stringId int
-	fretId int
+	fretId   int
 }
 
 type Fretboard struct {
-	musicalNotes [NumStrings][NumFrets] MusicalNote
+	musicalNotes [NumStrings][NumFrets]MusicalNote
 }
 
 func indexOf(element string, data []string) int {
@@ -88,8 +88,8 @@ func getFretboard() *Fretboard {
 
 		for fretId := 0; fretId < NumFrets; fretId++ {
 			fretboard.musicalNotes[stringId][fretId] = MusicalNote{
-				canonicalNotes[(openStringCanonicalId + fretId) % NumCanonicalNotes],
-				openStringOctave + (openStringCanonicalId + fretId) / NumCanonicalNotes,
+				canonicalNotes[(openStringCanonicalId+fretId)%NumCanonicalNotes],
+				openStringOctave + (openStringCanonicalId+fretId)/NumCanonicalNotes,
 			}
 		}
 	}
@@ -112,7 +112,7 @@ func getMusicalNoteCoordinates(musicalNote MusicalNote, fretboard *Fretboard) []
 	for stringId := 0; stringId < NumStrings; stringId++ {
 		for fretId := 0; fretId < NumFrets; fretId++ {
 			if fretboard.musicalNotes[stringId][fretId] == musicalNote {
-				result = append(result, FretboardCoordinate{ stringId, fretId})
+				result = append(result, FretboardCoordinate{stringId, fretId})
 			}
 		}
 	}
@@ -120,13 +120,13 @@ func getMusicalNoteCoordinates(musicalNote MusicalNote, fretboard *Fretboard) []
 	return result
 }
 
-func getMusicalNoteToCoordinatesMap(fretboard *Fretboard) map[MusicalNote] []FretboardCoordinate {
-	result := make(map[MusicalNote] []FretboardCoordinate)
+func getMusicalNoteToCoordinatesMap(fretboard *Fretboard) map[MusicalNote][]FretboardCoordinate {
+	result := make(map[MusicalNote][]FretboardCoordinate)
 	canonicalNotes := getCanonicalNotes()
 
 	for octave := MinOctave; octave <= MaxOctave; octave++ {
 		for _, canonicalNote := range canonicalNotes {
-			musicalNote := MusicalNote{ canonicalNote, octave }
+			musicalNote := MusicalNote{canonicalNote, octave}
 			result[musicalNote] = getMusicalNoteCoordinates(musicalNote, fretboard)
 		}
 	}
@@ -134,7 +134,7 @@ func getMusicalNoteToCoordinatesMap(fretboard *Fretboard) map[MusicalNote] []Fre
 	return result
 }
 
-func getScale(rootMusicalNote MusicalNote, steps []int)  []MusicalNote {
+func getScale(rootMusicalNote MusicalNote, steps []int) []MusicalNote {
 	canonicalNotes := getCanonicalNotes()
 	rootNoteCanonicalId := indexOf(rootMusicalNote.note, canonicalNotes[:])
 	rootNoteOctave := rootMusicalNote.octave
@@ -142,8 +142,8 @@ func getScale(rootMusicalNote MusicalNote, steps []int)  []MusicalNote {
 	var result []MusicalNote
 	offset := 0
 	for _, step := range steps {
-		octave := rootNoteOctave + (rootNoteCanonicalId + offset) / NumCanonicalNotes
-		musicalNote := MusicalNote{ canonicalNotes[(rootNoteCanonicalId + offset) % NumCanonicalNotes], octave }
+		octave := rootNoteOctave + (rootNoteCanonicalId+offset)/NumCanonicalNotes
+		musicalNote := MusicalNote{canonicalNotes[(rootNoteCanonicalId+offset)%NumCanonicalNotes], octave}
 		result = append(result, musicalNote)
 
 		offset += step
@@ -160,16 +160,16 @@ func getAllFretboardSequences(scale []MusicalNote, fretboard *Fretboard) [][]Fre
 		musicalNoteCoords := getMusicalNoteCoordinates(musicalNote, fretboard)
 
 		if numNotes == 1 {
-			for _, musicalNoteCoord	:= range musicalNoteCoords {
+			for _, musicalNoteCoord := range musicalNoteCoords {
 				var wrap []FretboardCoordinate
-				wrap = []FretboardCoordinate {musicalNoteCoord}
+				wrap = []FretboardCoordinate{musicalNoteCoord}
 				result = append(result, wrap)
 			}
 		} else {
 			var subResults [][]FretboardCoordinate = getAllFretboardSequences(subScale, fretboard)
 			for _, musicalNoteCoord := range musicalNoteCoords {
 				for _, subResult := range subResults {
-					var compositeResult []FretboardCoordinate = append([]FretboardCoordinate {musicalNoteCoord}, subResult...)
+					var compositeResult []FretboardCoordinate = append([]FretboardCoordinate{musicalNoteCoord}, subResult...)
 					result = append(result, compositeResult)
 				}
 			}
@@ -180,13 +180,13 @@ func getAllFretboardSequences(scale []MusicalNote, fretboard *Fretboard) [][]Fre
 }
 
 func manhattanDistance(x1 float64, y1 float64, x2 float64, y2 float64) float64 {
-	return math.Abs(x2 - x1) + math.Abs(y2 - y1)
+	return math.Abs(x2-x1) + math.Abs(y2-y1)
 }
 
 func euclideanDistance(x1 float64, y1 float64, x2 float64, y2 float64) float64 {
 	dx := x2 - x1
 	dy := y2 - y1
-	return math.Sqrt(dx * dx + dy * dy)
+	return math.Sqrt(dx*dx + dy*dy)
 }
 
 func clusterDistance(fretboardSequence []FretboardCoordinate) float64 {
@@ -194,8 +194,8 @@ func clusterDistance(fretboardSequence []FretboardCoordinate) float64 {
 	meanFretId := 0.0
 	for i, coord := range fretboardSequence {
 		i := float64(i)
-		meanStringId = (i * meanStringId + float64(coord.stringId))/(i + 1)
-		meanFretId = (i * meanFretId + float64(coord.fretId))/(i + 1)
+		meanStringId = (i*meanStringId + float64(coord.stringId)) / (i + 1)
+		meanFretId = (i*meanFretId + float64(coord.fretId)) / (i + 1)
 	}
 
 	score := 0.0
@@ -207,7 +207,7 @@ func clusterDistance(fretboardSequence []FretboardCoordinate) float64 {
 
 type ScoredFretboardSequence struct {
 	sequence []FretboardCoordinate
-	score float64
+	score    float64
 }
 
 func isConsistent(fretboardSequence []FretboardCoordinate) bool {
@@ -249,14 +249,14 @@ func saveFretboardSequence(fretboardSequence ScoredFretboardSequence, fretboard 
 	dc.SetRGB(1, 1, 1)
 	dc.Clear()
 	dc.SetRGB(0, 0, 0)
-	for stringId := 1; stringId <= NumStrings + 1; stringId++ {
+	for stringId := 1; stringId <= NumStrings+1; stringId++ {
 		stringId := float64(stringId)
-		dc.DrawLine(0.0, stringId * PngSquareLength, float64(width), stringId * PngSquareLength)
+		dc.DrawLine(0.0, stringId*PngSquareLength, float64(width), stringId*PngSquareLength)
 		dc.Stroke()
 	}
-	for fretId := 1; fretId <= NumFrets + 1; fretId++ {
+	for fretId := 1; fretId <= NumFrets+1; fretId++ {
 		fretId := float64(fretId)
-		dc.DrawLine(fretId * PngSquareLength, 0, fretId * PngSquareLength, float64(height))
+		dc.DrawLine(fretId*PngSquareLength, 0, fretId*PngSquareLength, float64(height))
 		dc.Stroke()
 	}
 
@@ -264,37 +264,36 @@ func saveFretboardSequence(fretboardSequence ScoredFretboardSequence, fretboard 
 		panic(err)
 	}
 
-
 	for stringId := 1; stringId <= NumStrings; stringId++ {
 		stringId := float64(stringId)
 		dc.SetRGB(0.5, 0.5, 0.5)
-		dc.DrawRectangle(0, stringId * PngSquareLength, PngSquareLength, PngSquareLength)
-		dc.DrawRectangle((NumFrets + 1) * PngSquareLength, stringId * PngSquareLength, PngSquareLength, PngSquareLength)
+		dc.DrawRectangle(0, stringId*PngSquareLength, PngSquareLength, PngSquareLength)
+		dc.DrawRectangle((NumFrets+1)*PngSquareLength, stringId*PngSquareLength, PngSquareLength, PngSquareLength)
 		dc.Fill()
 		dc.SetRGB(0.9, 0.9, 0.6)
-		dc.DrawRectangle(PngSquareLength, stringId * PngSquareLength, PngSquareLength, PngSquareLength)
+		dc.DrawRectangle(PngSquareLength, stringId*PngSquareLength, PngSquareLength, PngSquareLength)
 		// dc.DrawRectangle((NumFrets + 1) * PngSquareLength, stringId * PngSquareLength, PngSquareLength, PngSquareLength)
 		dc.Fill()
-		dc.SetRGB(0,0,0)
-		dc.DrawStringAnchored(fmt.Sprintf("%d", int(stringId)),float64(PngSquareLength)/2, (stringId + 0.5) * PngSquareLength, 0.5, 0.5)
-		dc.DrawStringAnchored(fmt.Sprintf("%d", int(stringId)),(NumFrets + 1.5) * PngSquareLength, (stringId + 0.5) * PngSquareLength, 0.5, 0.5)
+		dc.SetRGB(0, 0, 0)
+		dc.DrawStringAnchored(fmt.Sprintf("%d", int(stringId)), float64(PngSquareLength)/2, (stringId+0.5)*PngSquareLength, 0.5, 0.5)
+		dc.DrawStringAnchored(fmt.Sprintf("%d", int(stringId)), (NumFrets+1.5)*PngSquareLength, (stringId+0.5)*PngSquareLength, 0.5, 0.5)
 	}
 
 	for fretId := 1; fretId <= NumFrets; fretId++ {
 		fretId := float64(fretId)
 		dc.SetRGB(0.5, 0.5, 0.5)
-		dc.DrawRectangle(fretId * PngSquareLength, 0, PngSquareLength, PngSquareLength)
-		dc.DrawRectangle(fretId * PngSquareLength, (NumStrings + 1) * PngSquareLength, PngSquareLength, PngSquareLength)
+		dc.DrawRectangle(fretId*PngSquareLength, 0, PngSquareLength, PngSquareLength)
+		dc.DrawRectangle(fretId*PngSquareLength, (NumStrings+1)*PngSquareLength, PngSquareLength, PngSquareLength)
 		dc.Fill()
-		dc.SetRGB(0,0,0)
+		dc.SetRGB(0, 0, 0)
 		if fretId > 1 {
-			dc.DrawStringAnchored(fmt.Sprintf("%d", int(fretId) - 1), (fretId + 0.5) * PngSquareLength, float64(PngSquareLength)/2, 0.5, 0.5)
-			dc.DrawStringAnchored(fmt.Sprintf("%d", int(fretId) - 1), (fretId + 0.5) * PngSquareLength, (NumStrings + 1.5) * PngSquareLength, 0.5, 0.5)
+			dc.DrawStringAnchored(fmt.Sprintf("%d", int(fretId)-1), (fretId+0.5)*PngSquareLength, float64(PngSquareLength)/2, 0.5, 0.5)
+			dc.DrawStringAnchored(fmt.Sprintf("%d", int(fretId)-1), (fretId+0.5)*PngSquareLength, (NumStrings+1.5)*PngSquareLength, 0.5, 0.5)
 		}
 	}
 
 	for i, fretboardCoord := range fretboardSequence.sequence {
-		dc.DrawStringAnchored(fmt.Sprintf("%d", i+1), (float64(fretboardCoord.fretId) + 1.5) * PngSquareLength, (float64(fretboardCoord.stringId) + 1.25) * PngSquareLength, 0.5, 0.5)
+		dc.DrawStringAnchored(fmt.Sprintf("%d", i+1), (float64(fretboardCoord.fretId)+1.5)*PngSquareLength, (float64(fretboardCoord.stringId)+1.25)*PngSquareLength, 0.5, 0.5)
 	}
 
 	if err := dc.LoadFontFace(FontLight, FontSizeLight); err != nil {
@@ -305,14 +304,14 @@ func saveFretboardSequence(fretboardSequence ScoredFretboardSequence, fretboard 
 	for stringId := 0; stringId < NumStrings; stringId++ {
 		for fretId := 0; fretId < NumFrets; fretId++ {
 			musicalNote := fretboard.musicalNotes[stringId][fretId]
-			dc.DrawStringAnchored(fmt.Sprintf("[%s%d]", musicalNote.note, musicalNote.octave), (float64(fretId) + 1.5) * PngSquareLength, (float64(stringId) + 1.75) * PngSquareLength, 0.5, 0.5)
+			dc.DrawStringAnchored(fmt.Sprintf("[%s%d]", musicalNote.note, musicalNote.octave), (float64(fretId)+1.5)*PngSquareLength, (float64(stringId)+1.75)*PngSquareLength, 0.5, 0.5)
 		}
 	}
 
-	dc.SetRGB(0,0, 0)
+	dc.SetRGB(0, 0, 0)
 	for _, fretboardCoord := range fretboardSequence.sequence {
 		musicalNote := fretboard.musicalNotes[fretboardCoord.stringId][fretboardCoord.fretId]
-		dc.DrawStringAnchored(fmt.Sprintf("[%s%d]", musicalNote.note, musicalNote.octave), (float64(fretboardCoord.fretId) + 1.5) * PngSquareLength, (float64(fretboardCoord.stringId) + 1.75) * PngSquareLength, 0.5, 0.5)
+		dc.DrawStringAnchored(fmt.Sprintf("[%s%d]", musicalNote.note, musicalNote.octave), (float64(fretboardCoord.fretId)+1.5)*PngSquareLength, (float64(fretboardCoord.stringId)+1.75)*PngSquareLength, 0.5, 0.5)
 	}
 
 	if err := dc.LoadFontFace(FontLight, FontSizeTitle); err != nil {
@@ -360,7 +359,6 @@ func generateAllSequences(fretboard *Fretboard, scaleType string) {
 		}
 	}
 }
-
 
 func main() {
 	os.Mkdir("png", 0755)
