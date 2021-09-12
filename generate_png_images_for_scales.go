@@ -26,6 +26,7 @@ const (
 	FontLight         = "/usr/share/fonts/TTF/IBMPlexMono-Light.ttf"
 	FontSizeLight     = 70
 	FontSizeTitle     = 50
+	FretboardDotSize = 10
 )
 
 func getOpenStringNotes() [6]string {
@@ -41,6 +42,10 @@ func getCanonicalNotes() [12]string {
 		"C", "C#", "D", "D#",
 		"E", "F", "F#", "G",
 		"G#", "A", "A#", "B"}
+}
+
+func getFretboardDots() [10]int {
+	return [10]int{3, 5, 7, 9, 12, 15, 17, 19, 21, 24}
 }
 
 func getMinorScaleSteps() [8]int {
@@ -301,6 +306,21 @@ func saveFretboardSequence(fretboardSequence ScoredFretboardSequence, fretboard 
 		}
 	}
 
+	for _, fretboardDot := range getFretboardDots() {
+		twoDots := fretboardDot % NumCanonicalNotes == 0
+		fretboardDot := float64(fretboardDot)
+		if twoDots {
+			dc.DrawCircle((fretboardDot + 1.4) * PngSquareLength, 0.85 * PngSquareLength, FretboardDotSize)
+			dc.DrawCircle((fretboardDot + 1.6) * PngSquareLength, 0.85 * PngSquareLength, FretboardDotSize)
+			dc.DrawCircle((fretboardDot + 1.4) * PngSquareLength, (NumStrings + 1.15) * PngSquareLength, FretboardDotSize)
+			dc.DrawCircle((fretboardDot + 1.6) * PngSquareLength, (NumStrings + 1.15) * PngSquareLength, FretboardDotSize)
+		} else {
+			dc.DrawCircle((fretboardDot + 1.5) * PngSquareLength, 0.85 * PngSquareLength, FretboardDotSize)
+			dc.DrawCircle((fretboardDot + 1.5) * PngSquareLength, (NumStrings + 1.15) * PngSquareLength, FretboardDotSize)
+		}
+		dc.Fill()
+	}
+
 	for i, fretboardCoord := range fretboardSequence.sequence {
 		dc.DrawStringAnchored(fmt.Sprintf("%d", i+1), (float64(fretboardCoord.fretId)+1.5)*PngSquareLength, (float64(fretboardCoord.stringId)+1.25)*PngSquareLength, 0.5, 0.5)
 	}
@@ -375,7 +395,7 @@ func main() {
 	var scaleOctave int
 	flag.IntVar(&scaleOctave, "octave", 0, "2 <= octave <= 6")
 	flag.Parse()
-	if scaleOctave < 2 || scaleOctave > 6 {
+	if scaleOctave < MinOctave || scaleOctave > MaxOctave {
 		log.Print("Octave needs to be in interval [2,...,6]")
 		return
 	}
