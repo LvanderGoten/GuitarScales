@@ -5,9 +5,9 @@ _A program that finds "optimal" ways to play minor/major scales on the guitar fr
 go build generate_png_images_for_scales.go
 ./generate_png_images_for_scales -octave=<OCTAVE>
 ```
-where <OCTAVE> is an integer between 2 and 6 (both incl.).
+where _\<OCTAVE\>_ is an integer between 2 and 6 (both incl.).
 
-To generate everything use:
+To generate everything images for _all_ octaves use:
 ```shell
 go build generate_png_images_for_scales.go
 seq 2 6 | xargs -I {} ./generate_png_images_for_scales -octave={}
