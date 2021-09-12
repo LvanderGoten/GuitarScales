@@ -1,5 +1,5 @@
 # GuitarScales
-_A program that generates images for minor/major scales on the guitar fretboard._
+_A program that finds "optimal" ways to play minor/major scales on the guitar fretboard._
 
 ![C3maj](png/C3maj/0.png?raw=true "C3maj")
 ![D#3min](png/D%233min/0.png?raw=true "C3maj")
