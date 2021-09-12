@@ -19,7 +19,7 @@ const (
 	NumCanonicalNotes = 12
 	MinOctave         = 2
 	MaxOctave         = 6
-	ScaleCutoff       = 5
+	ScaleCutoff       = 10
 	PngSquareLength   = 200
 	FontRegular       = "/usr/share/fonts/TTF/IBMPlexMono-Regular.ttf"
 	FontSizeRegular   = 96
@@ -280,7 +280,8 @@ func saveFretboardSequence(fretboardSequence ScoredFretboardSequence, fretboard 
 		dc.Fill()
 		dc.SetRGB(0.9, 0.9, 0.6)
 		dc.DrawRectangle(PngSquareLength, stringId*PngSquareLength, PngSquareLength, PngSquareLength)
-		// dc.DrawRectangle((NumFrets + 1) * PngSquareLength, stringId * PngSquareLength, PngSquareLength, PngSquareLength)
+		dc.DrawRectangle((NumFrets/2 + 1) * PngSquareLength, stringId*PngSquareLength, PngSquareLength, PngSquareLength)
+		dc.DrawRectangle(NumFrets * PngSquareLength, stringId*PngSquareLength, PngSquareLength, PngSquareLength)
 		dc.Fill()
 		dc.SetRGB(0, 0, 0)
 		dc.DrawStringAnchored(fmt.Sprintf("%d", int(stringId)), float64(PngSquareLength)/2, (stringId+0.5)*PngSquareLength, 0.5, 0.5)
