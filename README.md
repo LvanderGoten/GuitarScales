@@ -1,13 +1,14 @@
 # GuitarScales
 _A program that finds "optimal" ways to play minor/major scales on the guitar fretboard._
 # Usage
+Install the /IBM Plex Mono/ font (assumed location: _/usr/share/fonts/TTF/_) and run:
 ```shell
 go build generate_png_images_for_scales.go
 ./generate_png_images_for_scales -octave=<OCTAVE>
 ```
 where _\<OCTAVE\>_ is an integer between 2 and 6 (both incl.).
 
-To generate all images for _all_ octaves use:
+To generate all images for all octaves use:
 ```shell
 go build generate_png_images_for_scales.go
 seq 2 6 | xargs -I {} ./generate_png_images_for_scales -octave={}
