@@ -6,12 +6,12 @@ Install the _IBM Plex Mono_ font (assumed location: _/usr/share/fonts/TTF/_) and
 go build generate_png_images_for_scales.go
 ./generate_png_images_for_scales -octave=<OCTAVE>
 ```
-where _\<OCTAVE\>_ is an integer between 2 and 6 (both incl.).
+where _\<OCTAVE\>_ is an integer between 2 and 5 (both incl.).
 
 To generate all images for all octaves use:
 ```shell
 go build generate_png_images_for_scales.go
-seq 2 6 | xargs -I {} ./generate_png_images_for_scales -octave={}
+seq 2 5 | xargs -I {} ./generate_png_images_for_scales -octave={}
 ```
 
 # Examples
