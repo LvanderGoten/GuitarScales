@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/fogleman/gg"
+	"log"
 	"math"
 	"os"
 	"path"
@@ -17,8 +19,7 @@ const (
 	NumCanonicalNotes = 12
 	MinOctave         = 2
 	MaxOctave         = 6
-	ScaleOctave       = 3
-	ScaleCutoff       = 10
+	ScaleCutoff       = 20
 	PngSquareLength   = 200
 	FontRegular       = "/usr/share/fonts/TTF/IBMPlexMono-Regular.ttf"
 	FontSizeRegular   = 96
@@ -152,25 +153,27 @@ func getScale(rootMusicalNote MusicalNote, steps []int) []MusicalNote {
 }
 
 func getAllFretboardSequences(scale []MusicalNote, fretboard *Fretboard) [][]FretboardCoordinate {
-	var result [][]FretboardCoordinate
+	var result [][]FretboardCoordinate = [][]FretboardCoordinate{}
 	numNotes := len(scale)
 
 	if numNotes > 0 {
 		musicalNote, subScale := scale[0], scale[1:]
 		musicalNoteCoords := getMusicalNoteCoordinates(musicalNote, fretboard)
 
-		if numNotes == 1 {
-			for _, musicalNoteCoord := range musicalNoteCoords {
-				var wrap []FretboardCoordinate
-				wrap = []FretboardCoordinate{musicalNoteCoord}
-				result = append(result, wrap)
-			}
-		} else {
-			var subResults [][]FretboardCoordinate = getAllFretboardSequences(subScale, fretboard)
-			for _, musicalNoteCoord := range musicalNoteCoords {
-				for _, subResult := range subResults {
-					var compositeResult []FretboardCoordinate = append([]FretboardCoordinate{musicalNoteCoord}, subResult...)
-					result = append(result, compositeResult)
+		if musicalNoteCoords != nil {
+			if numNotes == 1 {
+				for _, musicalNoteCoord := range musicalNoteCoords {
+					var wrap []FretboardCoordinate
+					wrap = []FretboardCoordinate{musicalNoteCoord}
+					result = append(result, wrap)
+				}
+			} else {
+				var subResults [][]FretboardCoordinate = getAllFretboardSequences(subScale, fretboard)
+				for _, musicalNoteCoord := range musicalNoteCoords {
+					for _, subResult := range subResults {
+						var compositeResult []FretboardCoordinate = append([]FretboardCoordinate{musicalNoteCoord}, subResult...)
+						result = append(result, compositeResult)
+					}
 				}
 			}
 		}
@@ -238,7 +241,12 @@ func scoreAndSortFretboardSequences(fretboardSequences [][]FretboardCoordinate) 
 		return scoredFretboardSequence[i].score < scoredFretboardSequence[j].score
 	})
 
-	return scoredFretboardSequence[:ScaleCutoff]
+	if len(scoredFretboardSequence) <= ScaleCutoff {
+		return scoredFretboardSequence
+	} else {
+		return scoredFretboardSequence[:ScaleCutoff]
+	}
+
 }
 
 func saveFretboardSequence(fretboardSequence ScoredFretboardSequence, fretboard *Fretboard, fname string) {
@@ -324,7 +332,7 @@ func saveFretboardSequence(fretboardSequence ScoredFretboardSequence, fretboard 
 	dc.SavePNG(fname)
 }
 
-func generateAllSequences(fretboard *Fretboard, scaleType string) {
+func generateAllSequences(fretboard *Fretboard, scaleType string, scaleOctave int) {
 
 	var steps [8]int
 	if scaleType == "min" {
@@ -335,32 +343,42 @@ func generateAllSequences(fretboard *Fretboard, scaleType string) {
 
 	for _, rootNote := range getCanonicalNotes() {
 
-		musicalRootNote := MusicalNote{rootNote, ScaleOctave}
+		musicalRootNote := MusicalNote{rootNote, scaleOctave}
 		scale := getScale(musicalRootNote, steps[:])
 		scaleFretboardSequences := getAllFretboardSequences(scale, fretboard)
-		scaleScoredFretboardSequences := scoreAndSortFretboardSequences(scaleFretboardSequences)
+		if len(scaleFretboardSequences) > 0 {
+			scaleScoredFretboardSequences := scoreAndSortFretboardSequences(scaleFretboardSequences)
 
-		if Debug {
-			for i, musicalNote := range scale {
-				fmt.Printf("%d: %s%d\n", i, musicalNote.note, musicalNote.octave)
-			}
-
-			for _, scaleScoredFretboardSequence := range scaleScoredFretboardSequences {
-				fmt.Printf("S = %.1f: ", scaleScoredFretboardSequence.score)
-				for _, coord := range scaleScoredFretboardSequence.sequence {
-					fmt.Printf("(%d %d)", coord.stringId, coord.fretId)
+			if Debug {
+				for i, musicalNote := range scale {
+					fmt.Printf("%d: %s%d\n", i, musicalNote.note, musicalNote.octave)
 				}
-				fmt.Println()
-			}
-		}
 
-		for i, fretboardSequence := range scaleScoredFretboardSequences {
-			saveFretboardSequence(fretboardSequence, fretboard, fmt.Sprintf("png/%s%d%s/%d.png", rootNote, ScaleOctave, scaleType, i))
+				for _, scaleScoredFretboardSequence := range scaleScoredFretboardSequences {
+					fmt.Printf("S = %.1f: ", scaleScoredFretboardSequence.score)
+					for _, coord := range scaleScoredFretboardSequence.sequence {
+						fmt.Printf("(%d %d)", coord.stringId, coord.fretId)
+					}
+					fmt.Println()
+				}
+			}
+
+			for i, fretboardSequence := range scaleScoredFretboardSequences {
+				saveFretboardSequence(fretboardSequence, fretboard, fmt.Sprintf("png/%s%d%s/%d.png", rootNote, scaleOctave, scaleType, i))
+			}
 		}
 	}
 }
 
 func main() {
+	var scaleOctave int
+	flag.IntVar(&scaleOctave, "octave", 0, "2 <= octave <= 6")
+	flag.Parse()
+	if scaleOctave < 2 || scaleOctave > 6 {
+		log.Print("Octave needs to be in interval [2,...,6]")
+		return
+	}
+
 	os.Mkdir("png", 0755)
 
 	fretboard := getFretboard()
@@ -368,6 +386,6 @@ func main() {
 		printFretboard(fretboard)
 	}
 
-	generateAllSequences(fretboard, "min")
-	generateAllSequences(fretboard, "maj")
+	generateAllSequences(fretboard, "min", scaleOctave)
+	generateAllSequences(fretboard, "maj", scaleOctave)
 }
