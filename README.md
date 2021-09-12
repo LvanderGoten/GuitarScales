@@ -7,7 +7,7 @@ go build generate_png_images_for_scales.go
 ```
 where _\<OCTAVE\>_ is an integer between 2 and 6 (both incl.).
 
-To generate everything images for _all_ octaves use:
+To generate all images for _all_ octaves use:
 ```shell
 go build generate_png_images_for_scales.go
 seq 2 6 | xargs -I {} ./generate_png_images_for_scales -octave={}
