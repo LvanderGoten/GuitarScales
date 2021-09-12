@@ -19,7 +19,7 @@ const (
 	NumCanonicalNotes = 12
 	MinOctave         = 2
 	MaxOctave         = 6
-	ScaleCutoff       = 20
+	ScaleCutoff       = 5
 	PngSquareLength   = 200
 	FontRegular       = "/usr/share/fonts/TTF/IBMPlexMono-Regular.ttf"
 	FontSizeRegular   = 96
